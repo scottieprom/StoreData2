@@ -5,7 +5,7 @@ var router = express.Router();
 var controllerMongoCollection = require('../controllers/database'); //load controller code dealing with database mongodb and Routes collection
 
 var mongodb = require('mongodb');
-var mongoDBURI = process.env.MONGODB_URI || 'scottieprom123:lolabc123@ds151008.mlab.com:51008/heroku_wcw1rlmf';
+var mongoDBURI = process.env.MONGODB_URI || 'mongodb://scottieprom123:lolabc123@ds151008.mlab.com:51008/heroku_wcw1rlmf';
 
 //**************************************************************************
 //***** mongodb get all of the Routes in Routes collection where frequence>=1
@@ -15,7 +15,7 @@ router.post('/getAllOrders', function (request, response) {
     mongodb.MongoClient.connect(mongoDBURI, function(err,  client) {
         if(err) throw err;
         //get handle to the database
-        var theDatabase = client.db('heroku_wcw1rlmf');
+        var theDatabase = client.db('eroku_wcw1rlmf');
 
         router.get('/getAllOrders', function(req, res, next)
         {
@@ -49,10 +49,3 @@ router.post('/getAllOrders', function (request, response) {
 router.get('/getAllOrders', controllerMongoCollection.getAllOrders);
 
 module.exports = router;
-
-//now processing post
-router.post('/storeData, function(req, res, next) {
-//expecting data variable called order--retrieve value using body-parser
-var value_name = req.body.order  //retrieve the data associated with order
-res.send("order succesfully received: " + value_name);
-});
