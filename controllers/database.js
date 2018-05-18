@@ -20,7 +20,7 @@ module.exports.getAllOrders =  function (request, response) {
 
 
         //get collection of routes
-        var Routes = theDatabase.collection('ORDERS');
+        var Routes = theDatabase.collection('Order');
 
 
         //SECOND -show another way to make request for ALL Routes  and simply collect the  documents as an
