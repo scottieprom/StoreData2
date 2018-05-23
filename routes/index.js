@@ -49,9 +49,7 @@ router.post('/getAllOrders', function (request, response) {
 //**************************************************************************
 //***** mongodb get all of the Routes in Routes collection w
 //      and Render information iwith an ejs view
-router.get('/getAllOrders', controllerDatabase.getAllOrders);
 
-router.get('/storeData' , controllerDatabase.storeData);
 
 
 
