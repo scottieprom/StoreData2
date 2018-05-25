@@ -15,9 +15,9 @@ module.exports.storeData = function (req, res) {
     var email = req.body.email;
 
     //READ IN POST BILLING INFO
-    var cardtype = req.body.ctype;
-    var cardnum = req.body.cnum;
-    var carddate = req.body.cdate;
+    var cardtype = req.body.cctype;
+    var cardnum = req.body.ccnum;
+    var carddate = req.body.ccdate;
 
     //READ IN POST SHIPPING INFO
     var shaddy = req.body.shipstreet;
@@ -26,11 +26,8 @@ module.exports.storeData = function (req, res) {
     var shzip = req.body.shipzip;
 
     //READ IN POST ORDERS INFO
-    var product_vector=req.body.PRODUCTS;
+    var product_vector = req.body.PRODUCTS;
     var total = req.body.ordertotal;
-
-    res.send("What I got was: " + product_vector);
-
 
     mongodb.MongoClient.connect(mongoDBURI, function (err, client) {
         if (err) throw err;
@@ -68,11 +65,16 @@ module.exports.storeData = function (req, res) {
             EMAIL: email
         };
 
-
         CUSTOMERS.insertOne(customerdata, function (err, result) {
             if (err) throw err;
         });
 
+        CUSTOMERS.find().toArray(function (err, docs) {
+            if (err) throw err;
+
+            res.render('storeData', {results: docs});
+
+        });
         //Billing collection operation
 
         var BILLING = theDatabase.collection('BILLING');
@@ -85,9 +87,15 @@ module.exports.storeData = function (req, res) {
             CREDITCARDEXP: carddate
         };
 
-        res.send(billingdata);
         BILLING.insertOne(billingdata, function (err, result) {
             if (err) throw err;
+        });
+
+        BILLING.find().toArray(function (err, docs) {
+            if (err) throw err;
+
+            res.render('storeData', {results: docs});
+
         });
 
         //Shipping collection operation
@@ -101,34 +109,46 @@ module.exports.storeData = function (req, res) {
             SHIPPING_STATE: shstate,
             SHIPPING_ZIP: shzip
         };
-        res.send(shippingdata);
+
+
         SHIPPING.insertOne(shippingdata, function (err, result) {
             if (err) throw err;
         });
-        /*
-                //ORDERS collection operation
-                var ORDERS = theDatabase.collection('ORDERS');
 
-                var orderdata = {
-                    _id: shippingID,
-                    CUSTOMER_ID: customerID,
-                    BILLING_ID: billingID,
-                    SHIPPING_ID: shippingID,
-                    DATE: day,
-                    PRODUCT_VECTOR: product_vector,
-                    ORDER_TOTAL: total
-                };
-                ORDERS.insertOne(orderdata, function (err, result) {
-                    if (err) throw err;
-                });
-        */
-        Routes.find().toArray(function (err, docs) {
+        SHIPPING.find().toArray(function (err, docs) {
             if (err) throw err;
 
             res.render('storeData', {results: docs});
 
         });
 
+        //ORDERS collection operation
+        var ORDERS = theDatabase.collection('ORDERS');
+
+        var orderdata = {
+            _id: shippingID,
+            CUSTOMER_ID: customerID,
+            BILLING_ID: billingID,
+            SHIPPING_ID: shippingID,
+            DATE: day,
+            //PRODUCT_VECTOR: product_vector,
+            ORDER_TOTAL: total
+        };
+
+        ORDERS.insertOne(orderdata, function (err, result) {
+            if (err) throw err;
+        });
+
+        ORDERS.find().toArray(function (err, docs) {
+            if (err) throw err;
+
+            res.render('storeData', {results: docs});
+
+        });
+        //close connection when your app is terminating.
+        client.close(function (err) {
+            if (err) throw err;
+        });
     })
 
 };

@@ -1,5 +1,5 @@
 var express = require('express');
-var router = express.Router();
+var router = express.Router('express');
 
 //LOAD the various controllers
 var controllerDatabase = require('../controllers/database'); //load controller code dealing with database mongodb and Routes collection
@@ -7,18 +7,21 @@ var controllerDatabase = require('../controllers/database'); //load controller c
 var mongodb = require('mongodb');
 var mongoDBURI = process.env.MONGODB_URI || 'mongodb://scottieprom123:lolabc123@ds151008.mlab.com:51008/heroku_wcw1rlmf';
 
+router.get('/', function(req,res,next){res.render('index', {title:'Express'});});
+
 //**************************************************************************
 //***** mongodb get all of the Routes in Routes collection where frequence>=1
 //      and sort by the name of the route.  Render information in the views/pages/mongodb.ejs
 
 router.post('/storeData', controllerDatabase.storeData);
+router.get('/getAllOrders', controllerDatabase.getAllOrders);
 
-router.post('/getAllOrders', function (request, response) {
+/*router.post('/getAllOrders', function (request, response) {
 
     mongodb.MongoClient.connect(mongoDBURI, function(err,  client) {
         if(err) throw err;
         //get handle to the database
-        var theDatabase = client.db('heroku_wcw1rlmf');
+        var theDatabase = client.db('heroku_hnqdq9m4');
 
         router.get('/getAllOrders', function(req, res, next)
         {
@@ -43,16 +46,6 @@ router.post('/getAllOrders', function (request, response) {
         });
     });//end of connect
 
-});//end XXX.get
-
-//CODE to route /getAllRoutes to appropriate  Controller function
-//**************************************************************************
-//***** mongodb get all of the Routes in Routes collection w
-//      and Render information iwith an ejs view
-
-
-
-
-
+});//end XXX.get*/
 
 module.exports = router;
