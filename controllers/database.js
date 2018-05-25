@@ -1,48 +1,35 @@
-var express = require('express');
-var router = express.Router();
 
 var mongodb = require('mongodb');
 var mongoDBURI = process.env.MONGODB_URI || 'mongodb://scottieprom123:lolabc123@ds151008.mlab.com:51008/heroku_wcw1rlmf';
 
-//to process data sent in on request need body-parser module
-var bodyParser = require('body-parser');
-var path = require('path'); //to work with separtors on any OS including Windows
-
-var querystring = require('querystring'); //for use in GET Query string of form URI/path?name=value
-
-router.use(bodyParser.json()); // for parsing application/json
-router.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencode
-
-
-module.exports.storeData = function (req, res, next) {
-
-    var customer_info =[];
-    var billing_info =[];
-    var shipment_info =[];
+module.exports.storeData = function (req, res) {
 
     //READ IN POST CUSTOMER INFO
-    customer_info['name1'] = req.body.firstname;
-    customer_info['name2'] = req.body.lastname;
-    customer_info['add1'] = req.body.addy;
-    customer_info['city'] = req.body.city;
-    customer_info['state'] = req.body.state;
-    customer_info['zipcode'] = req.body.zip;
-    customer_info['email'] = req.body.email;
+
+    var firstn = req.body.firstname;
+    var lastn = req.body.lastname;
+    var address = req.body.addy;
+    var city = req.body.city;
+    var stat = req.body.states;
+    var zip = req.body.zip;
+    var email = req.body.email;
 
     //READ IN POST BILLING INFO
-    billing_info['ctype'] = req.body.ctype;
-    billing_info['cnum'] = req.body.cnum;
-    billing_info['cdate'] = req.body.cdate;
+    var cardtype = req.body.ctype;
+    var cardnum = req.body.cnum;
+    var carddate = req.body.cdate;
 
     //READ IN POST SHIPPING INFO
-    shipment_info['add1'] = req.body.addy;
-    shipment_info['city'] = req.body.city;
-    shipment_info['state'] = req.body.state;
-    shipment_info['zipcode'] = req.body.zip;
+    var shaddy = req.body.shipstreet;
+    var shcity = req.body.shipcity;
+    var shstate = req.body.shipstate;
+    var shzip = req.body.shipzip;
 
     //READ IN POST ORDERS INFO
-    var product_vector=req.body.PRODUCT_VECTOR;
+    var product_vector=req.body.PRODUCTS;
     var total = req.body.ordertotal;
+
+    res.send("What I got was: " + product_vector);
 
 
     mongodb.MongoClient.connect(mongoDBURI, function (err, client) {
@@ -56,7 +43,8 @@ module.exports.storeData = function (req, res, next) {
          *     autogenerate it for the documents we newly insert into the CUSOTMERS, BILLING, SHIPPING
          *      for ORDERS we allow the system to autogenerate its  _id
          */
-            // Try MongoDB in replace of db *******
+
+
         var theDatabase = client.db('heroku_wcw1rlmf'); //set database
 
 
@@ -67,76 +55,79 @@ module.exports.storeData = function (req, res, next) {
 
         //customer collection operation
         var CUSTOMERS = theDatabase.collection('CUSTOMERS');
-        /*CUSTOMERS.deleteMany({}, function (err, result) {
-        if (err) throw err;
-        });*/
+
+
         var customerdata = {
             _id: customerID,
-            FIRSTNAME: customer_info['name1'],
-            LASTNAME: customer_info['name2'],
-            STREET: customer_info['add1'],
-            CITY: customer_info['city'],
-            STATE: customer_info['state'],
-            ZIP: customer_info['zipcode'],
-            EMAIL: customer_info['email'],
+            FIRSTNAME: firstn,
+            LASTNAME: lastn,
+            STREET: address,
+            CITY: city,
+            STATE: stat,
+            ZIP: zip,
+            EMAIL: email
         };
-        CUSTOMERS.insert(customerdata, function (err, result) {
+
+
+        CUSTOMERS.insertOne(customerdata, function (err, result) {
             if (err) throw err;
         });
-
 
         //Billing collection operation
 
         var BILLING = theDatabase.collection('BILLING');
-        /*BILLING.deleteMany({}, function (err, result) {
-        if (err) throw err;
-        });*/
+
         var billingdata = {
             _id: billingID,
             CUSTOMER_ID: customerID,
-            CREDITCARDTYPE: billing_info['ctype'],
-            CREDITCARDNUM: billing_info['cnum'],
-            CREDITCARDEXP: billing_info['cdate'],
+            CREDITCARDTYPE: cardtype,
+            CREDITCARDNUM: cardnum,
+            CREDITCARDEXP: carddate
         };
+
+        res.send(billingdata);
         BILLING.insertOne(billingdata, function (err, result) {
             if (err) throw err;
         });
 
         //Shipping collection operation
         var SHIPPING = theDatabase.collection('SHIPPING');
-        /*SHIPPING.deleteMany({}, function (err, result) {
-        if (err) throw err;
-        });*/
+
         var shippingdata = {
             _id: shippingID,
             CUSTOMER_ID: customerID,
-            SHIPPING_STREET: shipment_info['add1'],
-            SHIPPING_CITY: shipment_info['city'],
-            SHIPPING_STATE: shipment_info['state'],
-            SHIPPING_ZIP: shipment_info['zipcode'],
+            SHIPPING_STREET: shaddy,
+            SHIPPING_CITY: shcity,
+            SHIPPING_STATE: shstate,
+            SHIPPING_ZIP: shzip
         };
+        res.send(shippingdata);
         SHIPPING.insertOne(shippingdata, function (err, result) {
             if (err) throw err;
         });
+        /*
+                //ORDERS collection operation
+                var ORDERS = theDatabase.collection('ORDERS');
 
-        //ORDERS collection operation
-        var ORDERS = theDatabase.collection('ORDERS');
-        /*ORDERS.deleteMany({}, function (err, result) {
-        if (err) throw err;
-        });*/
-        var orderdata = {
-            _id: shippingID,
-            CUSTOMER_ID: customerID,
-            BILLING_ID: billingID,
-            SHIPPING_ID: shippingID,
-            DATE: day,
-            PRODUCT_VECTOR: product_vector,
-            ORDER_TOTAL: total,
-        };
-        ORDERS.insertOne(orderdata, function (err, result) {
+                var orderdata = {
+                    _id: shippingID,
+                    CUSTOMER_ID: customerID,
+                    BILLING_ID: billingID,
+                    SHIPPING_ID: shippingID,
+                    DATE: day,
+                    PRODUCT_VECTOR: product_vector,
+                    ORDER_TOTAL: total
+                };
+                ORDERS.insertOne(orderdata, function (err, result) {
+                    if (err) throw err;
+                });
+        */
+        Routes.find().toArray(function (err, docs) {
             if (err) throw err;
-        });
 
+            res.render('storeData', {results: docs});
+
+        });
 
     })
 
@@ -149,11 +140,11 @@ module.exports.getAllOrders =  function (request, response) {
 
 
         //get handle to the databse
-        var theDatabase = client.db('heroku_wcw1rlmf');
+        var theDatabase = client.db('heroku_hnqdq9m4');
 
 
         //get collection of routes
-        var Routes = theDatabase.collection('Order');
+        var Routes = theDatabase.collection('ORDERS');
 
 
         //SECOND -show another way to make request for ALL Routes  and simply collect the  documents as an
